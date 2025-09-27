@@ -11,26 +11,26 @@ export interface UserRequest extends Request {
 export const authenticate = async (req: UserRequest, res: Response, next: NextFunction): Promise<void> => {
     const tokenString = req.headers.authorization
     if (!tokenString) {
-        throw new Error("Unauthorized")
-    }
-    const token = tokenString.split(' ')[1]
+        res.status(401).json({ error: 'Unauthorized' })
+    } else {
+        const token = tokenString.split(' ')[1]
+        if (!token) {
+            res.status(401).json({ error: 'Token not found' })
+        } else {
+            try {
+                const decode = verify(token, process.env.JWT_SECRET!) as { email: string }
+                const user = await prisma.user.findUnique({
+                    where: {
+                        email: decode.email
+                    }
+                })
 
-    if (!token) {
-        throw new Error("Token not found")
-    }
-
-    try {
-        const decode = verify(token, 'JWT_SECRET') as { email: string }
-        const user = await prisma.user.findUnique({
-            where: {
-                email: decode.email
+                req.user = user ?? undefined!
+                next()
+            } catch (e) {
+                req.user = undefined!
+                next()
             }
-        })
-
-        req.user = user ?? undefined!
-        next()
-    } catch (e) {
-        req.user = undefined!
-        next()
+        }
     }
 }

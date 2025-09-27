@@ -9,8 +9,7 @@ const router = Router()
 const prisma = new PrismaClient()
 
 const generateToken = (user: User): string => {
-    const JWT_SECRET = process.env.JWT_SECRET!
-    return sign({ email: user.email }, JWT_SECRET)
+    return sign({ email: user.email }, process.env.JWT_SECRET!)
 }
 
 router.get('/', async (req: Request, res: Response) => {
@@ -38,7 +37,7 @@ router.post('/register', async (req: Request, res: Response) => {
             }
         })
         if (userExists) {
-            throw new Error("Email already exists")
+            res.status(409).json({ error: 'User with email already exists' })
         }
         const hashedPassword: string = await hash(password, 10)
         const newUser = await prisma.user.create({
@@ -65,16 +64,16 @@ router.post('/login', async (req: Request, res: Response) => {
             }
         })
         if (!user) {
-            throw new Error('User not found')
+            res.status(404).json({ error: 'User with email not found' })
+        } else {
+            const isPasswordCorrect = await compare(password, user.password)
+            if (!isPasswordCorrect) {
+                res.status(401).json({ error: 'Unauthorized' })
+            }
+            const { password: _password, ...userInfo } = user
+            res.status(201).json({ ...userInfo, token: generateToken(user) })
         }
 
-        const isPasswordCorrect = await compare(user.password, password)
-        if (!isPasswordCorrect) {
-            throw new Error('Incorrect password')
-        }
-
-        const { password: _password, ...userInfo } = user
-        res.status(201).json({ ...userInfo, token: generateToken(user) })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: 'Internal server error' })
