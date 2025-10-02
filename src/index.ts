@@ -1,12 +1,15 @@
 import express from 'express';
-import productRoutes from './productRoutes'
-import userRoutes from './userRoutes'
+import productRoutes from './routes/product-routes'
+import userRoutes from './routes/user-routes'
 
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
+require('dotenv').config()
 
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors())
 
 app.use('/products', productRoutes)
