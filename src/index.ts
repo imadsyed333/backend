@@ -1,6 +1,7 @@
 import express from 'express';
 import productRoutes from './routes/product-routes'
 import userRoutes from './routes/user-routes'
+import orderRoutes from './routes/order-routes'
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -15,6 +16,8 @@ app.use(cors())
 app.use('/products', productRoutes)
 
 app.use('/users', userRoutes)
+
+app.use('/orders', orderRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
