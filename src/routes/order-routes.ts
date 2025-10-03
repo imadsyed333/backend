@@ -21,6 +21,32 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 })
 
+router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+
+        const { cost, purchases } = req.body
+        if (!purchases) return res.status(400).json({ error: "Missing fields" })
+
+        const newOrder = await prisma.order.create({
+            data: {
+                userId: req.user.id,
+                cost,
+                purchases: {
+                    create: purchases
+                }
+            },
+            include: {
+                purchases: true
+            }
+        })
+        res.status(200).json(newOrder)
+    } catch (e) {
+        console.error(e)
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
 router.get('/all', async (req: Request, res: Response) => {
     try {
         const orders = await prisma.order.findMany()
@@ -65,3 +91,4 @@ router.delete('/:id', async (req: Request, res: Response) => {
     }
 })
 
+export default router
