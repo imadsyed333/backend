@@ -19,7 +19,7 @@ router.get('/', async (req: Request, res: Response) => {
         res.status(200).json(users)
     } catch (e) {
         console.error(e)
-        res.status(500).json({ error: 'Internal server error' })
+        res.status(500).json({ error: "Internal server error" })
     }
 })
 
@@ -46,7 +46,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
     } catch (e) {
         console.error(e)
-        res.status(500).json({ error: 'Internal server error' })
+        res.status(500).json({ error: "Internal server error" })
     }
 })
 
@@ -82,7 +82,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
     } catch (e) {
         console.error(e)
-        res.status(500).json({ error: 'Internal server error' })
+        res.status(500).json({ error: "Internal server error" })
     }
 })
 
@@ -126,34 +126,44 @@ router.post("/refresh", async (req: Request, res: Response) => {
 })
 
 router.post("/logout", async (req: Request, res: Response) => {
-    const token = req.cookies?.refreshToken || req.body?.refreshToken
-    if (token) {
-        await prisma.refreshToken.updateMany({
-            where: {
-                token
-            },
-            data: {
-                revoked: true
-            }
-        })
+    try {
+        const token = req.cookies?.refreshToken || req.body?.refreshToken
+        if (token) {
+            await prisma.refreshToken.updateMany({
+                where: {
+                    token
+                },
+                data: {
+                    revoked: true
+                }
+            })
+        }
+        res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" })
+    } catch (e) {
+        console.error(e)
+        res.status(500).json({ error: "Internal server error" })
     }
-    res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" })
 })
 
 router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+    try {
+        if (!req.user) return res.status(401).json({ error: "Unauthorized" })
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: req.user.id
-        },
-        select: {
-            id: true,
-            email: true,
-            name: true
-        }
-    })
-    res.json({ user })
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.user.id
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true
+            }
+        })
+        res.json(user)
+    } catch (e) {
+        console.error(e)
+        res.status(500).json({ error: "Internal server error" })
+    }
 })
 
 export default router
