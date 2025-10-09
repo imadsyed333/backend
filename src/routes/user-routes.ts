@@ -42,7 +42,7 @@ router.post('/register', async (req: Request, res: Response) => {
                 name,
             }
         })
-        res.status(201).json({ id: user.id, email: user.email, name: user.name })
+        res.status(201).json({ id: user.id, email: user.email, name: user.name }).redirect("/login")
 
     } catch (e) {
         console.error(e)
@@ -78,7 +78,7 @@ router.post('/login', async (req: Request, res: Response) => {
             }
         })
 
-        res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS).cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS).json({ message: `${user.email} logged in` })
+        return res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS).cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS).json({ message: `${user.email} logged in` })
 
     } catch (e) {
         console.error(e)
@@ -138,7 +138,7 @@ router.post("/logout", async (req: Request, res: Response) => {
                 }
             })
         }
-        res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" })
+        res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" }).redirect("/")
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
