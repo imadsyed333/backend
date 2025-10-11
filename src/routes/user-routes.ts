@@ -42,7 +42,7 @@ router.post('/register', async (req: Request, res: Response) => {
                 name,
             }
         })
-        res.status(201).json({ id: user.id, email: user.email, name: user.name }).redirect("/login")
+        res.status(201).json({ id: user.id, email: user.email, name: user.name })
 
     } catch (e) {
         console.error(e)
@@ -159,7 +159,7 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => 
                 name: true
             }
         })
-        res.json(user)
+        res.json({ user: user })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
