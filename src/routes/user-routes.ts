@@ -138,7 +138,7 @@ router.post("/logout", async (req: Request, res: Response) => {
                 }
             })
         }
-        res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" }).redirect("/")
+        res.clearCookie("accessToken").clearCookie("refreshToken").json({ message: "Logged out" })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
