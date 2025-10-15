@@ -23,6 +23,7 @@ model Purchase {
   id            Int    @id @default(autoincrement())
   order         Order  @relation(fields: [order_id], references: [id])
   order_id      Int
+  product_id    Int
   product_name  String
   product_price Int
   product_count Int
