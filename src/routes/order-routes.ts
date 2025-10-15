@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { PrismaClient } from "../../generated/prisma";
+import { PrismaClient, Purchase } from "../../generated/prisma";
 import { authenticate, AuthRequest } from "../middlewares/auth-middleware";
 
 const router = Router()
@@ -14,7 +14,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
                 userId: req.user.id
             }
         })
-        res.json(orders)
+        res.status(200).json({ orders: orders })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
@@ -25,7 +25,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) return res.status(401).json({ error: "Unauthorized" })
 
-        const { cost, purchases } = req.body
+        const { cost, purchases }: { cost: number, purchases: Purchase[] } = req.body
         if (!purchases) return res.status(400).json({ error: "Missing fields" })
 
         const newOrder = await prisma.order.create({
@@ -40,7 +40,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
                 purchases: true
             }
         })
-        res.status(200).json(newOrder)
+        res.status(200).json({ message: "Order placed" })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
