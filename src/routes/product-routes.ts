@@ -4,10 +4,10 @@ import { PrismaClient } from "../../generated/prisma"
 const router = Router()
 const prisma = new PrismaClient()
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/all', async (req: Request, res: Response) => {
     try {
         const products = await prisma.product.findMany()
-        res.status(200).json(products);
+        res.status(200).json({ products: products });
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
@@ -44,7 +44,7 @@ router.get('/:id', async (req: Request, res: Response) => {
             }
         })
         if (!product) return res.status(404).json({ error: "product not found" })
-        res.status(200).json(product)
+        res.status(200).json({ product: product })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })

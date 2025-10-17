@@ -40,7 +40,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
                 purchases: true
             }
         })
-        res.status(200).json({ message: "Order placed" })
+        res.status(201).json({ message: "Order placed" })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
@@ -50,7 +50,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 router.get('/all', async (req: Request, res: Response) => {
     try {
         const orders = await prisma.order.findMany()
-        res.status(200).json(orders)
+        res.status(200).json({ orders: orders })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
