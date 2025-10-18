@@ -12,6 +12,12 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
         const orders = await prisma.order.findMany({
             where: {
                 userId: req.user.id
+            },
+            select: {
+                id: true,
+                cost: true,
+                datetime: true,
+                purchases: true
             }
         })
         res.status(200).json({ orders: orders })
