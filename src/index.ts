@@ -3,16 +3,17 @@ import productRoutes from './routes/product-routes'
 import userRoutes from './routes/user-routes'
 import orderRoutes from './routes/order-routes'
 
+require('dotenv').config()
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT!
+const client_url = process.env.CLIENT_URL!
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-require('dotenv').config()
 
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: client_url,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
