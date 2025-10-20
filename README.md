@@ -1,1 +1,3 @@
 This is the working repository for the backend of Samosa Stuff, a full-stack, e-commerce app for purchasing homemade frozen samosas and other stuff. It is currently being developed using Node, Express and Prisma.
+
+You can find the frontend repository [here](https://github.com/imadsyed333/frontend).
