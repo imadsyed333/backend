@@ -68,7 +68,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const accessToken = signAccessToken({ sub: user.id, email: user.email })
         const refreshToken = signRefreshToken({ sub: user.id })
-        const expiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000))
+        const expiresAt = new Date(Date.now() + (REFRESH_COOKIE_OPTIONS.maxAge))
 
         await prisma.refreshToken.create({
             data: {
@@ -111,7 +111,7 @@ router.post("/refresh", async (req: Request, res: Response) => {
         })
         const newAccessToken = signAccessToken({ sub: payload.sub })
         const newRefreshToken = signRefreshToken({ sub: payload.sub })
-        const newExpiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000))
+        const newExpiresAt = new Date(Date.now() + (REFRESH_COOKIE_OPTIONS.maxAge))
 
         await prisma.refreshToken.create({
             data: {
