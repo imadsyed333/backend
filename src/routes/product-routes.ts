@@ -14,19 +14,34 @@ router.get('/all', async (req: Request, res: Response) => {
     }
 })
 
+// router.post('/', async (req: Request, res: Response) => {
+//     try {
+//         const { name, price, image, description } = req.body
+//         if (!name || !price || !image || !description) return res.status(400).json({ error: "Missing required fields" })
+//         const newProduct = await prisma.product.create({
+//             data: {
+//                 name,
+//                 description,
+//                 price,
+//                 image
+//             }
+//         })
+//         res.status(201).json(newProduct)
+//     } catch (e) {
+//         console.error(e)
+//         res.status(500).json({ error: "Internal server error" })
+//     }
+// })
+
 router.post('/', async (req: Request, res: Response) => {
     try {
-        const { name, price, image, description } = req.body
-        if (!name || !price || !image || !description) return res.status(400).json({ error: "Missing required fields" })
-        const newProduct = await prisma.product.create({
-            data: {
-                name,
-                description,
-                price,
-                image
-            }
+        const data = req.body
+        if (!data) return res.status(400).json({ error: 'Missing data' })
+        await prisma.product.createMany({
+            data: data,
+            skipDuplicates: true,
         })
-        res.status(201).json(newProduct)
+        res.status(201).json({ message: 'Product(s) created' })
     } catch (e) {
         console.error(e)
         res.status(500).json({ error: "Internal server error" })
