@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { PrismaClient } from "../../generated/prisma";
-import { authenticate, AuthRequest } from "../middlewares/auth-middleware";
+import { authenticate, AuthRequest, validateLogin, validateRegister } from "../middlewares/auth-middleware";
 import { hashPassword, signAccessToken, signRefreshToken, verifyPassword, verifyRefreshToken } from "../utils/auth-utils";
 import { ACCESS_COOKIE_OPTIONS, REFRESH_COOKIE_OPTIONS } from "../utils/constants";
 
@@ -23,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 })
 
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', validateRegister, async (req: Request, res: Response) => {
     try {
         const { name, email, password }: { name: string, email: string, password: string } = req.body
 
@@ -50,7 +50,7 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 })
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', validateLogin, async (req: Request, res: Response) => {
     try {
         const { email, password }: { email: string, password: string } = req.body
         if (!email || !password) return res.status(400).json({ error: "Missing fields" })
