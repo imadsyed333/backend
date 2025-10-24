@@ -1,8 +1,39 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../utils/auth-utils";
+import z from "zod";
 
 export interface AuthRequest extends Request {
     user?: { id: number, email?: string }
+}
+
+const registerSchema = z.object({
+    name: z.string(),
+    email: z.email(),
+    password: z.string().min(8, { error: "Must have at least 8 characters" }).regex(/[a-z]+/, { error: "Must contain a lower-case letter" }).regex(/[A-Z]+/, { error: "Must contain an upper-case letter" }).regex(/[0-9]+/, { error: "Must contain a digit" })
+})
+
+const loginSchema = z.object({
+    email: z.email(),
+    password: z.string(),
+})
+
+export const validateRegister = (req: Request, res: Response, next: NextFunction) => {
+    const result = registerSchema.safeParse(req.body)
+    if (result.success) {
+        next()
+    } else {
+        const errors = z.flattenError(result.error)
+        res.status(400).json({ errors: errors.fieldErrors })
+    }
+}
+
+export const validateLogin = (req: Request, res: Response, next: NextFunction) => {
+    const result = loginSchema.safeParse(req.body)
+    if (result.success) {
+        res.status(200).json(result.data)
+    } else {
+        res.status(400).json(result.error.issues)
+    }
 }
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
