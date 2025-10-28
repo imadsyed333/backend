@@ -1,14 +1,24 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../utils/auth-utils";
 import z from "zod";
+import { PrismaClient } from "../../generated/prisma";
 
 export interface AuthRequest extends Request {
     user?: { id: number, email?: string }
 }
 
+const prisma = new PrismaClient()
+
 const registerSchema = z.object({
-    name: z.string(),
-    email: z.email(),
+    name: z.string().nonempty({ error: "Must not be empty" }),
+    email: z.email().refine(async (input) => {
+        const count = await prisma.user.count({
+            where: {
+                email: input
+            }
+        })
+        return count < 1
+    }, "Email already exists"),
     password: z.string().min(8, { error: "Must have at least 8 characters" }).regex(/[a-z]+/, { error: "Must contain a lower-case letter" }).regex(/[A-Z]+/, { error: "Must contain an upper-case letter" }).regex(/[0-9]+/, { error: "Must contain a digit" })
 })
 
@@ -17,22 +27,23 @@ const loginSchema = z.object({
     password: z.string(),
 })
 
-export const validateRegister = (req: Request, res: Response, next: NextFunction) => {
-    const result = registerSchema.safeParse(req.body)
+export const validateRegister = async (req: Request, res: Response, next: NextFunction) => {
+    const result = await registerSchema.safeParseAsync(req.body)
     if (result.success) {
         next()
     } else {
         const errors = z.flattenError(result.error)
-        res.status(400).json({ errors: errors.fieldErrors })
+        console.log(errors)
+        res.status(400).json(errors.fieldErrors)
     }
 }
 
 export const validateLogin = (req: Request, res: Response, next: NextFunction) => {
     const result = loginSchema.safeParse(req.body)
     if (result.success) {
-        res.status(200).json(result.data)
+        next()
     } else {
-        res.status(400).json(result.error.issues)
+        res.status(400).json({ error: "Invalid credentials" })
     }
 }
 
