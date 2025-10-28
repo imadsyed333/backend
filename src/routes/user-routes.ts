@@ -27,22 +27,15 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
     try {
         const { name, email, password }: { name: string, email: string, password: string } = req.body
 
-        if (!email || !password) return res.status(400).json({ error: "Missing fields" })
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                email: email,
-            }
-        })
-        if (existingUser) return res.status(409).json({ error: "Email already in use" })
         const hashedPassword = await hashPassword(password)
-        const user = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 email,
                 password: hashedPassword,
                 name,
             }
         })
-        res.status(201).json({ id: user.id, email: user.email, name: user.name })
+        res.status(201).json({ message: "User created" })
 
     } catch (e) {
         console.error(e)
@@ -53,7 +46,6 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
 router.post('/login', validateLogin, async (req: Request, res: Response) => {
     try {
         const { email, password }: { email: string, password: string } = req.body
-        if (!email || !password) return res.status(400).json({ error: "Missing fields" })
 
         const user = await prisma.user.findUnique({
             where: {
