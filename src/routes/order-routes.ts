@@ -5,6 +5,7 @@ import { authenticate, AuthRequest } from "../middlewares/auth-middleware";
 const router = Router()
 const prisma = new PrismaClient()
 
+// The current user's orders
 router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) return res.status(401).json({ error: "Unauthorized" })
@@ -18,6 +19,9 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
                 cost: true,
                 datetime: true,
                 purchases: true
+            },
+            orderBy: {
+                datetime: 'desc'
             }
         })
         res.status(200).json({ orders: orders })
@@ -27,6 +31,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 })
 
+// Creating an order for the current user
 router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) return res.status(401).json({ error: "Unauthorized" })
@@ -53,6 +58,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     }
 })
 
+// Getting all available orders
 router.get('/all', async (req: Request, res: Response) => {
     try {
         const orders = await prisma.order.findMany()
@@ -63,6 +69,7 @@ router.get('/all', async (req: Request, res: Response) => {
     }
 })
 
+// Getting a specific order
 router.get('/:id', async (req: Request, res: Response) => {
     try {
         const orderId = req.params.id
@@ -80,6 +87,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 })
 
+// Deleting a specific order
 router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const orderId = req.params.id
