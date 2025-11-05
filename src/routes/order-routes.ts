@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { PrismaClient, Purchase } from "../../generated/prisma";
+import { PrismaClient, OrderItem } from "../../generated/prisma";
 import { authenticate, AuthRequest } from "../middlewares/auth-middleware";
 
 const router = Router()
@@ -17,11 +17,11 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
             select: {
                 id: true,
                 cost: true,
-                datetime: true,
-                purchases: true
+                createdAt: true,
+                orderItems: true
             },
             orderBy: {
-                datetime: 'desc'
+                createdAt: 'desc'
             }
         })
         res.status(200).json({ orders: orders })
@@ -36,19 +36,31 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) return res.status(401).json({ error: "Unauthorized" })
 
-        const { cost, purchases }: { cost: number, purchases: Purchase[] } = req.body
-        if (!purchases) return res.status(400).json({ error: "Missing fields" })
+        const cartItems = await prisma.cartItem.findMany({
+            where: {
+                userId: req.user.id,
+            },
+            include: {product: true}
+        })
+        if (cartItems.length === 0) return res.status(404).json({ error: "No cart items found" })
+        
+        const amount = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)
 
         const newOrder = await prisma.order.create({
             data: {
                 userId: req.user.id,
-                cost,
-                purchases: {
-                    create: purchases
+                cost: amount,
+                orderItems: {
+                    create: cartItems.map((item) => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        unitPrice: item.product.price,
+                        subtotal: item.product.price * item.quantity
+                    }))
                 }
             },
             include: {
-                purchases: true
+                orderItems: true
             }
         })
         res.status(201).json({ message: "Order placed" })
