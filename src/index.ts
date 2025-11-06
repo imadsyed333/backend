@@ -2,6 +2,7 @@ import express from 'express';
 import productRoutes from './routes/product-routes'
 import userRoutes from './routes/user-routes'
 import orderRoutes from './routes/order-routes'
+import cartRoutes from './routes/cart-routes'
 
 require('dotenv').config()
 const app = express();
@@ -24,6 +25,8 @@ app.use('/products', productRoutes)
 app.use('/user', userRoutes)
 
 app.use('/orders', orderRoutes)
+
+app.use('/cart', cartRoutes)
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
