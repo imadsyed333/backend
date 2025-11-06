@@ -1,7 +1,7 @@
 import { Response, Router } from "express";
 import { PrismaClient } from "../../generated/prisma";
 import { authenticate, AuthRequest } from "../middlewares/auth-middleware";
-import z, { xid } from "zod";
+import z from "zod";
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -53,7 +53,10 @@ router.post('/add', authenticate, async (req: AuthRequest, res: Response) => {
         if (!req.user) return res.status(401).json({ error: "Unauthorized" })
         
         const parse = CartItemSchema.safeParse(req.body)
-        if (!parse.success) return res.status(400).json(parse.error)
+        if (!parse.success) {
+            const errors = z.flattenError(parse.error)
+            return res.status(400).json(errors.fieldErrors)
+        }
         
         const {productId, quantity} = parse.data
 
@@ -140,3 +143,5 @@ router.put('/sync', authenticate, async (req: AuthRequest, res: Response) => {
         res.status(500).json({ error: "Internal server error" })
     }
 })
+
+export default router
