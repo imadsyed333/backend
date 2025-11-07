@@ -14,7 +14,14 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
         id: true,
         cost: true,
         createdAt: true,
-        orderItems: true,
+        orderItems: {
+          select: {
+            product: true,
+            unitPrice: true,
+            subtotal: true,
+            quantity: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
