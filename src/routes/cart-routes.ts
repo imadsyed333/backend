@@ -5,7 +5,7 @@ import { addToCart, fetchCart, syncCart } from "../controllers/cart-controller";
 const router = Router();
 
 // Fetching the current user's cart
-router.get("/all", authenticate, fetchCart);
+router.get("/", authenticate, fetchCart);
 
 // Adding an item to the user's cart
 router.post("/add", authenticate, addToCart);
