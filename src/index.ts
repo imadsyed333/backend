@@ -1,33 +1,42 @@
-import express from 'express';
-import productRoutes from './routes/product-routes'
-import userRoutes from './routes/user-routes'
-import orderRoutes from './routes/order-routes'
-import cartRoutes from './routes/cart-routes'
+import express from "express";
+import productRoutes from "./routes/product-routes";
+import userRoutes from "./routes/user-routes";
+import orderRoutes from "./routes/order-routes";
+import cartRoutes from "./routes/cart-routes";
+import webhookRoutes from "./routes/webhook-routes";
+import paymentRoutes from "./routes/payment-routes";
 
-require('dotenv').config()
+require("dotenv").config();
 const app = express();
-const port = process.env.PORT!
-const client_url = process.env.CLIENT_URL!
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
+const port = process.env.PORT!;
+const client_url = process.env.CLIENT_URL!;
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(cors({
+app.use(
+  cors({
     origin: client_url,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-}))
+  })
+);
 
-app.use('/products', productRoutes)
+app.use("/webhook", webhookRoutes);
 
-app.use('/user', userRoutes)
+app.use(express.json());
+app.use(cookieParser());
 
-app.use('/orders', orderRoutes)
+app.use("/products", productRoutes);
 
-app.use('/cart', cartRoutes)
+app.use("/user", userRoutes);
+
+app.use("/orders", orderRoutes);
+
+app.use("/cart", cartRoutes);
+
+app.use("/payments", paymentRoutes);
 
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);
 });
