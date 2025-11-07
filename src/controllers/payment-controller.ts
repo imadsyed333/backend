@@ -57,9 +57,7 @@ export const createCheckoutSession = async (
         stripeSessionId: session.id,
       },
     });
-
-    if (!session.url) return res.status(400).json({ error: "Checkout failed" });
-    res.redirect(303, session.url);
+    res.status(200).json({ url: session.url });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: err.message });
