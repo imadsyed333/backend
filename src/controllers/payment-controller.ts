@@ -3,6 +3,8 @@ import { AuthRequest } from "../middlewares/auth-middleware";
 import prisma from "../lib/prisma";
 import stripe from "../lib/stripe";
 
+const DOMAIN = process.env.CLIENT_URL;
+
 export const createCheckoutSession = async (
   req: AuthRequest,
   res: Response
@@ -41,8 +43,8 @@ export const createCheckoutSession = async (
         quantity: item.quantity,
       })),
       metadata: { userId, amount, currency },
-      success_url: process.env.STRIPE_SUCCESS_URL!,
-      cancel_url: process.env.STRIPE_CANCEL_URL!,
+      success_url: `${DOMAIN}/checkout/success`,
+      cancel_url: `${DOMAIN}/checkout/cancel`,
     });
 
     // Save a pending payment record
@@ -56,7 +58,8 @@ export const createCheckoutSession = async (
       },
     });
 
-    res.status(200).json({ url: session.url });
+    if (!session.url) return res.status(400).json({ error: "Checkout failed" });
+    res.redirect(303, session.url);
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: err.message });
