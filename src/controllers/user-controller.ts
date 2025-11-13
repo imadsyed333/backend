@@ -83,7 +83,13 @@ export const loginUser = async (req: Request, res: Response) => {
     return res
       .cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS)
       .cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS)
-      .json({ message: `${user.email} logged in` });
+      .json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Internal server error" });
