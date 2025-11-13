@@ -29,7 +29,7 @@ const registerSchema = z.object({
 
 const loginSchema = z.object({
   email: z.email(),
-  password: z.string(),
+  password: z.string().min(1),
 });
 
 export const validateRegister = async (
@@ -53,6 +53,7 @@ export const validateLogin = (
 ) => {
   const result = loginSchema.safeParse(req.body);
   if (result.success) {
+    console.log("Hello there everything is fine");
     next();
   } else {
     res.status(400).json({ error: "Invalid credentials" });
