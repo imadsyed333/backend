@@ -35,6 +35,9 @@ export const fetchCart = async (req: AuthRequest, res: Response) => {
         product: true,
         quantity: true,
       },
+      orderBy: {
+        id: "asc",
+      },
     });
     res.status(200).json({ cartItems: cartItems });
   } catch (e) {
@@ -101,7 +104,10 @@ export const syncCart = async (req: AuthRequest, res: Response) => {
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     const parse = BulkUpdateSchema.safeParse(req.body);
-    if (!parse.success) return res.status(400).json(parse.error);
+    if (!parse.success) {
+      const errors = z.flattenError(parse.error);
+      return res.status(400).json(errors);
+    }
 
     const { updateItems, deleteItems } = parse.data;
 
