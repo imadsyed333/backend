@@ -1,13 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyAccessToken } from "../utils/auth-utils";
 import z from "zod";
-import { PrismaClient } from "../../generated/prisma";
+import prisma from "../lib/prisma";
 
 export interface AuthRequest extends Request {
   user?: { id: number; email?: string };
 }
-
-const prisma = new PrismaClient();
 
 const registerSchema = z.object({
   name: z.string().nonempty({ error: "Must not be empty" }),
@@ -83,4 +81,23 @@ export const authenticate = async (
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
+};
+
+export const authorize = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  const user = await prisma.user.findUnique({
+    cacheStrategy: {
+      ttl: 60 * 60,
+    },
+    where: {
+      id: req.user.id,
+    },
+  });
+  if (user?.role !== "ADMIN")
+    return res.status(403).json({ error: "Forbidden" });
+  next();
 };

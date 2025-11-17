@@ -6,7 +6,7 @@ import {
   getAllProducts,
   getProduct,
 } from "../controllers/product-controller";
-import { authenticate } from "../middlewares/auth-middleware";
+import { authenticate, authorize } from "../middlewares/auth-middleware";
 
 const router = Router();
 
@@ -14,15 +14,15 @@ const router = Router();
 router.get("/all", getAllProducts);
 
 // Create a product
-router.post("/", authenticate, createProduct);
+router.post("/", authenticate, authorize, createProduct);
 
 // Bulk create products
-router.post("/", authenticate, createProductBulk);
+router.post("/", authenticate, authorize, createProductBulk);
 
 // Get product with id
 router.get("/:id", getProduct);
 
 // Delete product with id
-router.delete("/:id", authenticate, deleteProduct);
+router.delete("/:id", authenticate, authorize, deleteProduct);
 
 export default router;

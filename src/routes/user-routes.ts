@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   authenticate,
+  authorize,
   validateLogin,
   validateRegister,
 } from "../middlewares/auth-middleware";
@@ -16,7 +17,7 @@ import {
 const router = Router();
 
 // Get all users
-router.get("/all", authenticate, getAllUsers);
+router.get("/all", authenticate, authorize, getAllUsers);
 
 // Register user
 router.post("/register", validateRegister, registerUser);
