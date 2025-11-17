@@ -14,7 +14,11 @@ const BulkProductSchema = z.array(ProductSchema);
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+      cacheStrategy: {
+        ttl: 60 * 60,
+      },
+    });
     res.status(200).json({ products: products });
   } catch (e) {
     console.error(e);
@@ -24,7 +28,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Not authorized" });
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const parse = ProductSchema.safeParse(req.body);
     if (!parse.success) {
       const errors = z.flattenError(parse.error);
@@ -49,7 +53,7 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
 
 export const createProductBulk = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Not authorized" });
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
     const parse = BulkProductSchema.safeParse(req.body);
     if (!parse.success) {
@@ -88,7 +92,7 @@ export const getProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Not authorized" });
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
     const productId = req.params.id;
 

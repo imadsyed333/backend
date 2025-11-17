@@ -15,8 +15,11 @@ import {
 
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Not authorized" });
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const users = await prisma.user.findMany({
+      cacheStrategy: {
+        ttl: 60 * 60,
+      },
       select: {
         id: true,
         name: true,
@@ -142,7 +145,7 @@ export const refreshUserToken = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) return res.status(401).json({ error: "Not authorized" });
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const token = req.cookies?.refreshToken || req.body?.refreshToken;
     if (!token) return res.status(400).json({ error: "Missing token" });
     await prisma.refreshToken.updateMany({

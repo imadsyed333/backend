@@ -59,6 +59,9 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     const { productId, quantity } = parse.data;
 
     const product = await prisma.product.findUnique({
+      cacheStrategy: {
+        ttl: 60 * 60,
+      },
       where: {
         id: productId,
       },
