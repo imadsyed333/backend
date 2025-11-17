@@ -91,6 +91,7 @@ export const loginUser = async (req: Request, res: Response) => {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
         },
       });
   } catch (e) {
@@ -178,6 +179,7 @@ export const getUserProfile = async (req: AuthRequest, res: Response) => {
         id: true,
         email: true,
         name: true,
+        role: true,
       },
     });
     res.json({ user: user });
