@@ -11,7 +11,7 @@ export const createCheckoutSession = async (
 ) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Not authorized" });
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const currency = "cad";
 
@@ -47,16 +47,6 @@ export const createCheckoutSession = async (
       cancel_url: `${DOMAIN}/checkout/cancel`,
     });
 
-    // Save a pending payment record
-    await prisma.payment.create({
-      data: {
-        userId,
-        amount,
-        currency,
-        status: "pending",
-        stripeSessionId: session.id,
-      },
-    });
     res.status(200).json({ url: session.url });
   } catch (err: any) {
     console.error(err);

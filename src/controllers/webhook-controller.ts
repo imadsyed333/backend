@@ -19,14 +19,6 @@ export const handleCheckout = async (req: Request, res: Response) => {
       const userId = session.metadata?.userId!;
       const amount = parseInt(session.metadata?.amount!);
 
-      const payment = await prisma.payment.update({
-        where: { stripeSessionId: session.id },
-        data: {
-          status: "succeeded",
-          stripeIntentId: session.payment_intent as string,
-        },
-      });
-
       const cartItems = await prisma.cartItem.findMany({
         where: { userId: parseInt(userId) },
         include: { product: true },
@@ -52,11 +44,6 @@ export const handleCheckout = async (req: Request, res: Response) => {
           },
         },
         include: { orderItems: true },
-      });
-
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { orderId: order.id },
       });
 
       await prisma.cartItem.deleteMany({ where: { userId: parseInt(userId) } });
