@@ -149,12 +149,9 @@ export const logoutUser = async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const token = req.cookies?.refreshToken || req.body?.refreshToken;
     if (!token) return res.status(400).json({ error: "Missing token" });
-    await prisma.refreshToken.updateMany({
+    await prisma.refreshToken.deleteMany({
       where: {
-        token,
-      },
-      data: {
-        revoked: true,
+        userId: req.user.id,
       },
     });
     res
