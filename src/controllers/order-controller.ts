@@ -7,9 +7,6 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
     const orders = await prisma.order.findMany({
-      cacheStrategy: {
-        ttl: 60 * 60,
-      },
       where: {
         userId: req.user.id,
       },
