@@ -44,7 +44,7 @@ export const createCheckoutSession = async (
       })),
       metadata: { userId, amount, currency },
       success_url: `${DOMAIN}/checkout/success`,
-      cancel_url: `${DOMAIN}/checkout/cancel`,
+      cancel_url: `${DOMAIN}/cart`,
     });
 
     res.status(200).json({ url: session.url });
