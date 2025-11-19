@@ -83,6 +83,22 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
       cacheStrategy: {
         ttl: 60 * 60,
       },
+      select: {
+        id: true,
+        cost: true,
+        createdAt: true,
+        orderItems: {
+          select: {
+            product: true,
+            unitPrice: true,
+            subtotal: true,
+            quantity: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     res.status(200).json({ orders: orders });
   } catch (e) {
