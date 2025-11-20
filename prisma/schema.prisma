@@ -19,7 +19,7 @@ enum Role {
 enum OrderStatus {
   PLACED
   READY
-  RECIEVED
+  RECEIVED
 }
 
 model Product {
