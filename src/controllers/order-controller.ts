@@ -1,6 +1,12 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth-middleware";
 import prisma from "../lib/prisma";
+import z from "zod";
+import { OrderStatus } from "../../generated/prisma";
+
+const OrderStatusSchema = z.object({
+  status: z.literal(Object.values(OrderStatus)),
+});
 
 export const getUserOrders = async (req: AuthRequest, res: Response) => {
   try {
@@ -14,6 +20,7 @@ export const getUserOrders = async (req: AuthRequest, res: Response) => {
         id: true,
         cost: true,
         createdAt: true,
+        status: true,
         orderItems: {
           select: {
             product: true,
@@ -80,13 +87,19 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const orders = await prisma.order.findMany({
-      cacheStrategy: {
-        ttl: 60 * 60,
-      },
       select: {
         id: true,
         cost: true,
         createdAt: true,
+        status: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
         orderItems: {
           select: {
             product: true,
@@ -137,6 +150,53 @@ export const deleteOrder = async (req: AuthRequest, res: Response) => {
     });
     if (!order) return res.status(404).json({ error: "Order not found" });
     res.status(200).json(order);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+    const orderId = req.params.id;
+    if (!orderId) return res.status(400).json({ error: "id not provided" });
+    const parse = OrderStatusSchema.safeParse(req.body);
+    if (!parse.success) {
+      const errors = z.flattenError(parse.error);
+      return res.status(400).json(errors.fieldErrors);
+    }
+    const newOrder = await prisma.order.update({
+      where: {
+        id: parseInt(orderId),
+      },
+      data: {
+        status: parse.data.status,
+      },
+      select: {
+        id: true,
+        cost: true,
+        createdAt: true,
+        status: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        orderItems: {
+          select: {
+            product: true,
+            unitPrice: true,
+            subtotal: true,
+            quantity: true,
+          },
+        },
+      },
+    });
+    res.status(200).json({ order: newOrder });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Internal server error" });

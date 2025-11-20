@@ -6,6 +6,7 @@ import {
   getAllOrders,
   getOrder,
   getUserOrders,
+  updateOrderStatus,
 } from "../controllers/order-controller";
 
 const router = Router();
@@ -24,5 +25,7 @@ router.get("/:id", authenticate, authorize, getOrder);
 
 // Deleting a specific order
 router.delete("/:id", authenticate, authorize, deleteOrder);
+
+router.put("/:id", authenticate, authorize, updateOrderStatus);
 
 export default router;
