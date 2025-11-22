@@ -90,9 +90,6 @@ export const authorize = async (
 ) => {
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
   const user = await prisma.user.findUnique({
-    cacheStrategy: {
-      ttl: 60 * 60,
-    },
     where: {
       id: req.user.id,
     },

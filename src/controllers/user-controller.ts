@@ -17,9 +17,6 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     const users = await prisma.user.findMany({
-      cacheStrategy: {
-        ttl: 60 * 60,
-      },
       select: {
         id: true,
         name: true,
