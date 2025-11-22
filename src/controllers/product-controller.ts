@@ -15,8 +15,8 @@ const BulkProductSchema = z.array(ProductSchema);
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany({
-      cacheStrategy: {
-        ttl: 60 * 60,
+      orderBy: {
+        id: "asc",
       },
     });
     res.status(200).json({ products: products });
@@ -84,6 +84,32 @@ export const getProduct = async (req: Request, res: Response) => {
     });
     if (!product) return res.status(404).json({ error: "product not found" });
     res.status(200).json({ product: product });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateProduct = async (req: AuthRequest, res: Response) => {
+  try {
+    const productId = req.params.id;
+
+    if (!productId) return res.status(400).json({ error: "id not provided" });
+
+    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+    const parsed = ProductSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errors = z.flattenError(parsed.error);
+      return res.status(400).json(errors);
+    }
+    const updatedProduct = await prisma.product.update({
+      where: {
+        id: parseInt(productId),
+      },
+      data: parsed.data,
+    });
+    res.status(200).json({ product: updatedProduct });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Internal server error" });

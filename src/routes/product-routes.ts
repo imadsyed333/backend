@@ -5,6 +5,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProduct,
+  updateProduct,
 } from "../controllers/product-controller";
 import { authenticate, authorize } from "../middlewares/auth-middleware";
 
@@ -21,6 +22,9 @@ router.post("/", authenticate, authorize, createProductBulk);
 
 // Get product with id
 router.get("/:id", getProduct);
+
+// Update product with id
+router.put("/:id", authenticate, authorize, updateProduct);
 
 // Delete product with id
 router.delete("/:id", authenticate, authorize, deleteProduct);
