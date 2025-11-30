@@ -5,7 +5,7 @@ import z from "zod";
 
 const ProductSchema = z.object({
   name: z.string(),
-  price: z.number(),
+  price: z.coerce.number(),
   image: z.string(),
   description: z.string(),
 });
