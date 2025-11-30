@@ -8,6 +8,9 @@ import {
   updateProduct,
 } from "../controllers/product-controller";
 import { authenticate, authorize } from "../middlewares/auth-middleware";
+import multer from "multer";
+
+const upload = multer({ dest: "uploads/" });
 
 const router = Router();
 
@@ -15,7 +18,13 @@ const router = Router();
 router.get("/all", getAllProducts);
 
 // Create a product
-router.post("/", authenticate, authorize, createProduct);
+router.post(
+  "/",
+  authenticate,
+  authorize,
+  upload.single("image"),
+  createProduct
+);
 
 // Bulk create products
 router.post("/", authenticate, authorize, createProductBulk);
@@ -24,7 +33,13 @@ router.post("/", authenticate, authorize, createProductBulk);
 router.get("/:id", getProduct);
 
 // Update product with id
-router.put("/:id", authenticate, authorize, updateProduct);
+router.put(
+  "/:id",
+  authenticate,
+  authorize,
+  upload.single("image"),
+  updateProduct
+);
 
 // Delete product with id
 router.delete("/:id", authenticate, authorize, deleteProduct);
