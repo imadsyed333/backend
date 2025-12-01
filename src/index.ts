@@ -5,6 +5,7 @@ import orderRoutes from "./routes/order-routes";
 import cartRoutes from "./routes/cart-routes";
 import webhookRoutes from "./routes/webhook-routes";
 import paymentRoutes from "./routes/payment-routes";
+import path from "path";
 
 require("dotenv").config();
 const app = express();
@@ -36,6 +37,8 @@ app.use("/orders", orderRoutes);
 app.use("/cart", cartRoutes);
 
 app.use("/payments", paymentRoutes);
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
