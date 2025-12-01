@@ -6,7 +6,6 @@ import z from "zod";
 const ProductSchema = z.object({
   name: z.string(),
   price: z.coerce.number(),
-  image: z.string(),
   description: z.string(),
 });
 
@@ -34,38 +33,18 @@ export const createProduct = async (req: AuthRequest, res: Response) => {
       const errors = z.flattenError(parse.error);
       return res.status(400).json(errors.fieldErrors);
     }
-    const { name, price, image, description } = parse.data;
+    const { name, price, description } = parse.data;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
 
     const newProduct = await prisma.product.create({
       data: {
         name,
         description,
         price,
-        image,
+        image: imageUrl,
       },
     });
     res.status(201).json({ product: newProduct });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const createProductBulk = async (req: AuthRequest, res: Response) => {
-  try {
-    if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-    const parse = BulkProductSchema.safeParse(req.body);
-    if (!parse.success) {
-      const errors = z.flattenError(parse.error);
-      return res.status(400).json(errors);
-    }
-
-    const newProducts = await prisma.product.createMany({
-      data: parse.data,
-      skipDuplicates: true,
-    });
-    res.status(201).json({ products: newProducts });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Internal server error" });

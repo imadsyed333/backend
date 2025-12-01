@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   createProduct,
-  createProductBulk,
   deleteProduct,
   getAllProducts,
   getProduct,
@@ -25,9 +24,6 @@ router.post(
   upload.single("image"),
   createProduct
 );
-
-// Bulk create products
-router.post("/", authenticate, authorize, createProductBulk);
 
 // Get product with id
 router.get("/:id", getProduct);
