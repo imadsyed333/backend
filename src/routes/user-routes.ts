@@ -12,6 +12,7 @@ import {
   logoutUser,
   refreshUserToken,
   registerUser,
+  verifyEmail,
 } from "../controllers/user-controller";
 
 const router = Router();
@@ -33,5 +34,8 @@ router.post("/logout", authenticate, logoutUser);
 
 // Get user profile
 router.get("/profile", authenticate, getUserProfile);
+
+// Check if email exists
+router.post("/email-check", verifyEmail);
 
 export default router;

@@ -182,3 +182,20 @@ export const getUserProfile = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Missing email" });
+
+    const userCount = await prisma.user.count({
+      where: {
+        email,
+      },
+    });
+    res.status(200).json({ emailExists: userCount > 0 });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
