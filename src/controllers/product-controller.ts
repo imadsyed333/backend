@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { AuthRequest } from "../middlewares/auth-middleware";
 import z from "zod";
+import path from "path";
+import { unlink } from "fs";
 
 const ProductSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1, { message: "Name is required" }),
   price: z.coerce.number(),
-  description: z.string(),
+  description: z.string().min(1, { message: "Description is required" }),
 });
-
-const BulkProductSchema = z.array(ProductSchema);
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
@@ -28,19 +28,18 @@ export const getAllProducts = async (req: Request, res: Response) => {
 export const createProduct = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
     const parse = ProductSchema.safeParse(req.body);
     if (!parse.success) {
       const errors = z.flattenError(parse.error);
       return res.status(400).json(errors.fieldErrors);
     }
-    const { name, price, description } = parse.data;
+
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
 
     const newProduct = await prisma.product.create({
       data: {
-        name,
-        description,
-        price,
+        ...parse.data,
         image: imageUrl,
       },
     });
@@ -77,16 +76,49 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
 
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
+    const existingProduct = await prisma.product.findUnique({
+      where: {
+        id: parseInt(productId),
+      },
+    });
+
+    if (!existingProduct) return res.status(404).json({ error: "Not Found" });
+
     const parsed = ProductSchema.safeParse(req.body);
     if (!parsed.success) {
       const errors = z.flattenError(parsed.error);
       return res.status(400).json(errors);
     }
+
+    let newImageUrl: string | undefined = undefined;
+
+    if (req.file) {
+      newImageUrl = `/uploads/${req.file.filename}`;
+
+      if (existingProduct.image) {
+        const oldImageUrl = path.join(
+          __dirname,
+          "../../" + existingProduct.image
+        );
+
+        unlink(oldImageUrl, (err) => {
+          if (err) {
+            console.error("Error deleting old image:", err);
+          } else {
+            console.log("Old image deleted:", oldImageUrl);
+          }
+        });
+      }
+    }
+
     const updatedProduct = await prisma.product.update({
       where: {
         id: parseInt(productId),
       },
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        ...(newImageUrl !== undefined && { image: newImageUrl }),
+      },
     });
     res.status(200).json({ product: updatedProduct });
   } catch (e) {
