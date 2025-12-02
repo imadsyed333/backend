@@ -51,7 +51,6 @@ export const validateLogin = (
 ) => {
   const result = loginSchema.safeParse(req.body);
   if (result.success) {
-    console.log("Hello there everything is fine");
     next();
   } else {
     res.status(400).json({ error: "Invalid credentials" });
