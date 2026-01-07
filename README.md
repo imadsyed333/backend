@@ -13,6 +13,6 @@ You can find the frontend repository [here](https://github.com/imadsyed333/front
 <ul>
     <li><b>Express</b> - For quickly building a backend REST API without many restrictions.</li>
     <li><b>Prisma</b> - For easily building a database and schema that is both typesafe and "provider-agnostic".</li>
-    <li><b>TypeScript</b> - Type safety is king. Nuff said.</li>
+    <li><b>TypeScript</b> - Type safety is king. Very useful when working with custom non-primitive data types</li>
     <li><b>Zod</b> - Very handy for error handling and data validation.</li>
 </ul>
