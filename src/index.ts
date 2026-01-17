@@ -6,6 +6,7 @@ import cartRoutes from "./routes/cart-routes";
 import webhookRoutes from "./routes/webhook-routes";
 import paymentRoutes from "./routes/payment-routes";
 import path from "path";
+import { appendFileSync } from "fs";
 
 require("dotenv").config();
 const app = express();
@@ -13,6 +14,17 @@ const port = process.env.PORT!;
 const client_url = process.env.CLIENT_URL!;
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests from this IP, please try again after 15 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
 
 app.use(
   cors({
