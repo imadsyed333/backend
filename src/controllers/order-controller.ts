@@ -13,7 +13,7 @@ const CreateOrderSchema = z.object({
   phone: z
     .string()
     .min(1, { error: "phone must not be empty" })
-    .refine(validator.isMobilePhone),
+    .regex(/^\(\d{3}\) \d{3}-\d{4}$/),
 });
 
 export const getUserOrders = async (req: AuthRequest, res: Response) => {
@@ -93,6 +93,12 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         orderItems: true,
       },
     });
+
+    await prisma.cartItem.deleteMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
     res.status(201).json({ message: "Order placed" });
   } catch (e) {
     console.error(e);
@@ -109,6 +115,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
         cost: true,
         createdAt: true,
         status: true,
+        phone: true,
         user: {
           select: {
             id: true,
