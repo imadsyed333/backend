@@ -3,9 +3,17 @@ import { AuthRequest } from "../middlewares/auth-middleware";
 import prisma from "../lib/prisma";
 import z from "zod";
 import { OrderStatus } from "../../generated/prisma";
+import validator from "validator";
 
 const OrderStatusSchema = z.object({
   status: z.literal(Object.values(OrderStatus)),
+});
+
+const CreateOrderSchema = z.object({
+  phone: z
+    .string()
+    .min(1, { error: "phone must not be empty" })
+    .refine(validator.isMobilePhone),
 });
 
 export const getUserOrders = async (req: AuthRequest, res: Response) => {
@@ -45,6 +53,14 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
+    const parse = CreateOrderSchema.safeParse(req.body);
+    if (!parse.success) {
+      const errors = z.flattenError(parse.error);
+      return res.status(400).json(errors.fieldErrors);
+    }
+
+    const { phone } = parse.data;
+
     const cartItems = await prisma.cartItem.findMany({
       where: {
         userId: req.user.id,
@@ -56,7 +72,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
 
     const amount = cartItems.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
-      0
+      0,
     );
 
     const newOrder = await prisma.order.create({
@@ -71,6 +87,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
             subtotal: item.product.price * item.quantity,
           })),
         },
+        phone,
       },
       include: {
         orderItems: true,
