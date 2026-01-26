@@ -49,6 +49,7 @@ model Order {
   userId     Int
   cost       Int
   status     OrderStatus @default(PLACED)
+  phone String  
   orderItems OrderItem[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
