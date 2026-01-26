@@ -32,10 +32,10 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
-app.use("/webhook", webhookRoutes);
+// app.use("/webhook", webhookRoutes);
 
 app.use(express.json());
 app.use(cookieParser());
