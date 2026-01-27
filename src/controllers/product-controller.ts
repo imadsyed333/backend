@@ -98,7 +98,7 @@ export const updateProduct = async (req: AuthRequest, res: Response) => {
       if (existingProduct.image) {
         const oldImageUrl = path.join(
           __dirname,
-          "../../" + existingProduct.image
+          "../../" + existingProduct.image,
         );
 
         unlink(oldImageUrl, (err) => {
@@ -140,8 +140,21 @@ export const deleteProduct = async (req: AuthRequest, res: Response) => {
         id: parseInt(productId),
       },
     });
+
     if (!deletedProduct)
       return res.status(404).json({ error: "product not found" });
+
+    if (deletedProduct.image) {
+      const imageUrl = path.join(__dirname, "../../" + deletedProduct.image);
+
+      unlink(imageUrl, (err) => {
+        if (err) {
+          console.error("Error deleting image:", err);
+        } else {
+          console.log("Image deleted:", imageUrl);
+        }
+      });
+    }
     res.status(200).json(deletedProduct);
   } catch (e) {
     console.error(e);
